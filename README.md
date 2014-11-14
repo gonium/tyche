@@ -46,7 +46,7 @@ Connect your STM32-Discovery board and run
 	$ make flash
 
 to upload the binary into the microcontroller. In order to see the USART output,
-connect a 3V3 TTL adaptor to PA2 (USART2_TX). You can use `screen` to see the output:
+connect a 3V3 TTL adaptor to PA2 (USART2_RX). You can use `screen` to see the output:
 
 	$ screen /dev/ttyUSB0 115200
 

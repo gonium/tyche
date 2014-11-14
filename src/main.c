@@ -26,6 +26,7 @@
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/cm3/systick.h>
 #include "ticks.h"
+#include "rng_driver.h"
 
 static void clock_setup(void) {
 
@@ -37,6 +38,9 @@ static void clock_setup(void) {
 
 	/* Enable clocks for USART2. */
 	rcc_periph_clock_enable(RCC_USART2);
+
+	/* Enable clock for RNG. */
+	rcc_periph_clock_enable(RCC_RNG);
 }
 
 static void usart_setup(void) {
@@ -63,39 +67,38 @@ static void gpio_setup(void) {
 	gpio_set_af(GPIOA, GPIO_AF7, GPIO2);
 }
 
-static void test_malloc(void) {
-  printf("Testing malloc\n");
-  char* str = (char*) malloc(16);
-  for (uint8_t i=0; i<10; ++i) {
-	str[i]=(char)i+'0';
-  }
-  str[10]='\0';
-  printf("malloc'ed these values: %s\n", str);
-  free(str);
-}
-
-
 int main(void) {
-  int j = 0, c = 0;
-
   clock_setup();
   systick_setup(1000);
   gpio_setup();
   usart_setup();
+	rng_driver_setup();
 
-  printf("\nSTM32F4-Discovery skeleton code started.\n");
-  test_malloc();
-  while (1) {
-	/* Blink the LED (PD12) on the board with every transmitted byte. */
-	gpio_toggle(GPIOD, GPIO12);	/* LED on/off */
-	printf("%d", c);
-	fflush(stdout);
-	c = (c == 9) ? 0 : c + 1;	/* Increment c. */
-	if ((j++ % 80) == 0) {		/* Newline after line full. */
-	  usart_send_blocking(USART2, '\r');
-	  usart_send_blocking(USART2, '\n');
+  //printf("\nTyche\n");
+	uint32_t rnd;
+	while (1) {
+		/* Blink the LED (PD12) on the board with every transmitted byte. */
+		gpio_toggle(GPIOD, GPIO12);	/* LED on/off */
+		rnd = rng_driver_get_uint32();
+	//	printf("%u - ", (unsigned int) rnd);
+	//	while (rnd) {
+	//		if (rnd & 1)
+	//			printf("1");
+	//		else
+	//			printf("0");
+	//		rnd >>= 8;
+	//	}
+		while (rnd) {
+			printf("%c", rnd & 0x000000FF);
+			rnd >>= 8;
+		}
+		fflush(stdout);
+		//c = (c == 9) ? 0 : c + 1;	/* Increment c. */
+		//if ((j++ % 80) == 0) {		/* Newline after line full. */
+		//	usart_send_blocking(USART2, '\r');
+		//	usart_send_blocking(USART2, '\n');
+		//}
+		msleep(20);
 	}
-	msleep(1000); // sleep for one second
-  }
-  return 0;
+	return 0;
 }

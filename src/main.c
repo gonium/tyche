@@ -88,11 +88,12 @@ int main(void) {
 	//			printf("0");
 	//		rnd >>= 8;
 	//	}
-		while (rnd) {
-			printf("%c", rnd & 0x000000FF);
-			rnd >>= 8;
-		}
-		fflush(stdout);
+			printf("R:");
+			printf("%02x", (unsigned int) (rnd >> 24) & 0xFF);
+			printf("%02x", (unsigned int) (rnd >> 16) & 0xFF);
+			printf("%02x", (unsigned int) (rnd >> 8) & 0xFF);
+			printf("%02x", (unsigned int) rnd & 0xFF);
+			printf(":.\n");
 		//c = (c == 9) ? 0 : c + 1;	/* Increment c. */
 		//if ((j++ % 80) == 0) {		/* Newline after line full. */
 		//	usart_send_blocking(USART2, '\r');

@@ -5,24 +5,38 @@ import (
 	//"bytes"
 	//"encoding/bytes"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"github.com/tarm/goserial"
 	"os"
 	"strings"
 )
 
+var serialpath = flag.String("device", "/dev/ttyUSB0",
+	"the serial device where the hardware is attached to.")
+var outfilepath = flag.String("output", "rnglog.raw",
+	"the file to write the random data to.")
+
+func init() {
+	flag.Parse()
+}
+
 func main() {
-	c := &serial.Config{Name: "/dev/cu.usbserial-A600e1gh", Baud: 115200}
+	c := &serial.Config{Name: *serialpath, Baud: 115200}
 	serial_conn, err := serial.OpenPort(c)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot open device: "+err.Error())
+		fmt.Fprintf(os.Stderr, "Cannot open device: "+err.Error()+"\n")
+		os.Exit(1)
 	}
 
-	f, err := os.Create("rnglog")
+	f, err := os.Create(*outfilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot create file: "+err.Error())
 	}
 	defer f.Close()
+
+	fmt.Println("Reading from", *serialpath, ", writing to",
+		*outfilepath)
 
 	//buf := make([]byte, 128)
 	//n, err := s.Read(buf)
@@ -50,7 +64,7 @@ func main() {
 				fmt.Fprintln(os.Stderr, "cannot convert random number from string:", rng_line[1], ";-(")
 				continue
 			}
-			//fmt.Println(random_number)
+			fmt.Println(random_number)
 			_, err = f.Write(random_number)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "cannot write random number to file.")
